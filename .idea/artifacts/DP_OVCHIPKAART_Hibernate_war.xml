@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="DP_OVCHIPKAART_Hibernate:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>DP_OVCHIPKAART_Hibernate</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="DP_OVCHIPKAART_Hibernate-1.0-SNAPSHOT.war">
+      <element id="artifact" artifact-name="DP_OVCHIPKAART_Hibernate:war exploded" />
+    </root>
+  </artifact>
+</component>
