@@ -1,38 +1,44 @@
 package domein;
 
 
+import factory.DAOFactory;
+
 import javax.persistence.*;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 @Entity
 @Table(name = "reiziger")
 public class Reiziger {
     @Id
-    @Column(name="reiziger_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "reiziger_id", nullable = false)
     private int reiziger_id;
+
+
     private String voorletters;
     private String tussenvoegsel;
     private String achternaam;
     private Date geboortedatum;
 
     @JoinColumn(name = "reiziger_id")
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne()
     private Adres adres;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy= "reiziger")
+    @OneToMany(mappedBy= "reiziger")
     private List<OVChipkaart> alleOVChipkaarten = new ArrayList<>();
 
+    @Transient
+    DAOFactory df = DAOFactory.newInstance();
 
-    public Reiziger(int reiziger_id, String voorletters, String tussenvoegsel, String achternaam, Date geboortedatum) {
-        this.reiziger_id = reiziger_id;
+    public Reiziger(String voorletters, String tussenvoegsel, String achternaam, Date geboortedatum) {
         this.voorletters = voorletters;
         this.tussenvoegsel = tussenvoegsel;
         this.achternaam = achternaam;
         this.geboortedatum = geboortedatum;
-
     }
 
     public Reiziger() {
@@ -41,18 +47,20 @@ public class Reiziger {
     public OVChipkaart createNewOvchipkaart(int kaartnummer, Date datum, int klasse, int saldo) {
         OVChipkaart ov = new OVChipkaart(kaartnummer, datum, klasse, saldo, this);
         alleOVChipkaarten.add(ov);
+        df.getOvdao().save(ov);
+
         return ov;
     }
 
     public boolean deleteOvChipkaart(int kaart_nummer) {
         for (OVChipkaart ov : alleOVChipkaarten) {
             if (ov.getKaart_nummer() == kaart_nummer) {
+                df.getOvdao().delete(ov);
                 alleOVChipkaarten.remove(ov);
                 return true;
             }
         }
         return false;
-
     }
 
     public OVChipkaart findByKaartnummer(int kaart_nummer) {
@@ -67,13 +75,16 @@ public class Reiziger {
     public Adres createNewAdres(String postcode, String huisnummer, String straat, String woonplaats) {
         Adres adres = new Adres(this, this.getId(), postcode, huisnummer, straat, woonplaats);
         this.adres = adres;
+        df.getAdao().save(adres);
         return adres;
     }
 
     public void deleteAdres() {
         if (adres != null) {
+            df.getAdao().delete(getAdres());
             this.adres = null;
         }
+
     }
 
     public void addOvchipkaart(OVChipkaart ovChipkaart) {
@@ -86,14 +97,11 @@ public class Reiziger {
 
     public void setAdres(Adres adres) {
         this.adres = adres;
+        df.getRdao().update(this);
     }
 
     public int getId() {
         return reiziger_id;
-    }
-
-    public void setId(int reiziger_id) {
-        this.reiziger_id = reiziger_id;
     }
 
     public String getVoorletters() {
@@ -102,6 +110,7 @@ public class Reiziger {
 
     public void setVoorletters(String voorletters) {
         this.voorletters = voorletters;
+        df.getRdao().update(this);
     }
 
     public String getTussenvoegsel() {
@@ -110,6 +119,7 @@ public class Reiziger {
 
     public void setTussenvoegsel(String tussenvoegsel) {
         this.tussenvoegsel = tussenvoegsel;
+        df.getRdao().update(this);
     }
 
     public String getAchternaam() {
@@ -118,6 +128,7 @@ public class Reiziger {
 
     public void setAchternaam(String achternaam) {
         this.achternaam = achternaam;
+        df.getRdao().update(this);
     }
 
     public Date getGeboortedatum() {
@@ -126,6 +137,7 @@ public class Reiziger {
 
     public void setGeboortedatum(Date geboortedatum) {
         this.geboortedatum = geboortedatum;
+        df.getRdao().update(this);
     }
 
     public List<OVChipkaart> getAlleOVChipkaarten() {
@@ -134,6 +146,14 @@ public class Reiziger {
 
     public void setAlleOVChipkaarten(ArrayList<OVChipkaart> alleOVChipkaarten) {
         this.alleOVChipkaarten = alleOVChipkaarten;
+    }
+
+    public int getReiziger_id() {
+        return reiziger_id;
+    }
+
+    public void setReiziger_id(int reiziger_id) {
+        this.reiziger_id = reiziger_id;
     }
 
     @Override

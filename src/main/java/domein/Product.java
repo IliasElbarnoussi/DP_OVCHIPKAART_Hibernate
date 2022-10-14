@@ -1,6 +1,8 @@
 package domein;
 
 
+import factory.DAOFactory;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,11 @@ public class Product {
     @ManyToMany(mappedBy="alleProducten")
     private List<OVChipkaart> alleOvchipkaarten = new ArrayList<>();
 
+    @Transient
+    static
+    DAOFactory df = DAOFactory.newInstance();
+
+
     public Product(int product_nummer, String naam, String beschrijving, double prijs) {
         this.product_nummer = product_nummer;
         this.naam = naam;
@@ -28,10 +35,11 @@ public class Product {
 
     }
 
-    public static Product createNewProduct(int product_nummer, String naam, String beschrijving, double prijs) {
-        Product product = new Product(product_nummer, naam, beschrijving, prijs);
-        return product;
-    }
+//    public static Product createNewProduct(int product_nummer, String naam, String beschrijving, double prijs) {
+//        Product product = new Product(product_nummer, naam, beschrijving, prijs);
+//        df.getPdao().save(product);
+//        return product;
+//    }
 
     public void deleteProduct() {
         for (OVChipkaart ov : getAlleOvchipkaarten()) {

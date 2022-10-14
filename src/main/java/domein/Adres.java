@@ -1,5 +1,7 @@
 package domein;
 
+import factory.DAOFactory;
+
 import javax.persistence.*;
 import java.util.Random;
 
@@ -7,12 +9,12 @@ import java.util.Random;
 @Table(name = "adres")
 public class Adres {
     @Id
-    @Column(name="adres_id")
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int adres_id;
 
 //    @OneToOne(targetEntity=Reiziger.class, cascade=CascadeType.ALL)
     @JoinColumn(name = "reiziger_id")
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne()
     private Reiziger reiziger;
 
 
@@ -21,9 +23,10 @@ public class Adres {
     private String straat;
     private String woonplaats;
 
+    @Transient
+    DAOFactory df = DAOFactory.newInstance();
 
     public Adres(Reiziger reiziger, int adres_id, String postcode, String huisnummer, String straat, String woonplaats) {
-
         this.adres_id = adres_id;
         this.reiziger = reiziger;
         this.postcode = postcode;
@@ -58,6 +61,7 @@ public class Adres {
 
     public void setPostcode(String postcode) {
         this.postcode = postcode;
+        df.getAdao().update(this);
     }
 
     public String getHuisnummer() {
@@ -66,6 +70,7 @@ public class Adres {
 
     public void setHuisnummer(String huisnummer) {
         this.huisnummer = huisnummer;
+        df.getAdao().update(this);
     }
 
     public String getStraat() {
@@ -74,6 +79,7 @@ public class Adres {
 
     public void setStraat(String straat) {
         this.straat = straat;
+        df.getAdao().update(this);
     }
 
     public String getWoonplaats() {
@@ -82,6 +88,8 @@ public class Adres {
 
     public void setWoonplaats(String woonplaats) {
         this.woonplaats = woonplaats;
+        df.getAdao().update(this);
+
     }
 
     @Override

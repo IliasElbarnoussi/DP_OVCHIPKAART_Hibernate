@@ -1,6 +1,8 @@
 package domein;
 
 
+import factory.DAOFactory;
+
 import javax.persistence.*;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -11,24 +13,23 @@ import java.util.List;
 public class OVChipkaart {
     @Id
     @Column(name="kaart_nummer")
-    public int kaart_nummer;
-    public Date geldig_tot;
-    public int klasse;
-    public int saldo;
+    private int kaart_nummer;
+    private Date geldig_tot;
+    private int klasse;
+    private int saldo;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="reiziger_id", nullable=false)
-    public Reiziger reiziger;
+    private Reiziger reiziger;
 
     @ManyToMany
     @JoinTable(name = "ov_chipkaart_product",
             joinColumns = { @JoinColumn(name = "kaart_nummer") },
             inverseJoinColumns = { @JoinColumn(name = "product_nummer") })
-    public List<Product> alleProducten = new ArrayList<>();
+    private List<Product> alleProducten = new ArrayList<>();
 
-
-
-
+    @Transient
+    DAOFactory df = DAOFactory.newInstance();
 
     public OVChipkaart(int kaart_nummer, Date geldig_tot, int klasse, int saldo, Reiziger reiziger) {
         this.kaart_nummer = kaart_nummer;
@@ -42,17 +43,26 @@ public class OVChipkaart {
 
     }
 
+    public Product createNewProductAndAdd(int product_nummer, String naam, String beschrijving, double prijs) {
+        Product product = new Product(product_nummer, naam, beschrijving, prijs);
+        df.getPdao().save(product);
+        alleProducten.add(product);
+        return product;
+    }
+
     public void addProduct(Product product) {
         alleProducten.add(product);
         product.voegOVChipkaartToe(this);
     }
 
-    public void removeProduct(int index) {
-        Product product = alleProducten.get(index);
-
-        product.verwijderOVChipkaart(this);
-        alleProducten.remove(product);
-
+    public void deleteProduct(int product_nummer) {
+        for (int i = 0; i < alleProducten.size(); i++) {
+            Product product = alleProducten.get(i);
+            if (product.getProduct_nummer() == product_nummer) {
+                alleProducten.remove(product);
+                df.getPdao().delete(product);
+            }
+        }
     }
 
     public Reiziger getReiziger() {
